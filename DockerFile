@@ -1,0 +1,36 @@
+FROM ubuntu:20.04
+LABEL maintainer="mail@elaborate.pro"
+#Timezone
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+#Update
+RUN apt-get update
+#C++ base
+RUN apt-get install -y git cmake libgtest-dev build-essential gcc-10 g++-10 
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 && update-alternatives --config gcc
+#C++ packages
+RUN apt-get install -y nlohmann-json3-dev libboost-all-dev libboost-program-options-dev libgtest-dev libgoogle-glog-dev
+#Postgres
+RUN apt-get install -y postgresql postgresql-contrib libpq-dev
+#Python
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get install -y python3.9 python3-pip
+RUN pip3 install timestring selenium pyvirtualdisplay psycopg2 bs4 python-dateutil
+#Common tools
+RUN apt-get install -y vim netcat wget unzip
+#Google
+RUN apt-get update &&  apt-get install -y libgconf-2-4 libnss3
+RUN apt-get install -y libxss1 libappindicator1 libindicator7  libcurl3-dev
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt install -y ./google-chrome-stable_current_amd64.deb && \
+    apt-get install -y xvfb
+RUN wget https://chromedriver.storage.googleapis.com/87.0.4280.88/chromedriver_linux64.zip &&\
+    unzip chromedriver_linux64.zip &&\
+    rm chromedriver_linux64.zip &&\
+    mv chromedriver /usr/local/bin/chromedriver &&\
+    chown root:root /usr/local/bin/chromedriver &&\
+    chmod 0755 /usr/local/bin/chromedriver
+RUN echo 'PS1="\\t🎅\[\e[33;41m\][\[\e[m\]\[\e[32m\]\u\[\e[m\]\[\e[36m\]@\[\e[m\]\[\e[34m\]\h\[\e[m\]\[\e[33;41m\]]\[\e[m\]🎄 \n \w: "' > ~/.bashrc
+WORKDIR /app
+CMD bash

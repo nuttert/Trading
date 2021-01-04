@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  database:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-finan}
+      PGDATA: /data/postgres
+    ports:
+      - 127.0.0.1:5433:5432
+    volumes: 
+       - ./pg_data:/data/postgres
+
+  pgadmin:
+    image: dpage/pgadmin4:4.16
+    container_name: pgadmin4
+    ports:
+        - 3333:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    logging:
+      driver: "none"
+    depends_on:
+        - database
+  
+  notebook:
+      build: 
+          context: ./dockers
+          dockerfile: DockerFile.jupyter
+      volumes:
+        - ./notebooks:/home/jovyan/notebooks
+        - ./tables:/home/jovyan/csv_tables
+      ports:
+        - 8888:8888
+      container_name:  datascience-notebook-container
+      depends_on:
+          - database
+
+  trading:
+    container_name: trading
+    build: 
+      context: ./
+      dockerfile: DockerFile
+    volumes: 
+      - ./:/app
+    ports: 
+      - 9099:9099
+    depends_on:
+        - database
+  

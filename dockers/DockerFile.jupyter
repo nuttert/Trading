@@ -1,0 +1,12 @@
+FROM jupyter/datascience-notebook
+LABEL maintainer="mail@elaborate.pro"
+
+USER root
+RUN  apt-get update
+RUN apt-get install -y postgresql postgresql-contrib libpq-dev
+
+USER jovyan
+RUN pip3 install timestring selenium pyvirtualdisplay psycopg2 bs4 python-dateutil
+
+RUN echo 'PS1="\\t🎅\[\e[33;41m\][\[\e[m\]\[\e[32m\]\u\[\e[m\]\[\e[36m\]@\[\e[m\]\[\e[34m\]\h\[\e[m\]\[\e[33;41m\]]\[\e[m\]🎄 \n \w: "' > ~/.bashrc
+# WORKDIR /notebooks
